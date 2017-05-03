@@ -26,7 +26,8 @@ setup(
                  'architectureresource'},
     entry_points={
         'console_scripts': [
-            'architectureresource=architectureresource.cli:main',
+            'architectureresource=architectureresource.cli:get_resource_for_network',
+            'print_images=architectureresource.cli:print_images',
         ]
     },
     include_package_data=True,

@@ -24,6 +24,5 @@ def get_resource_for_network():
   from architectureresource.resource import NetworkAnalyzer
   
 
-
 if __name__ == "__main__":
     main()
