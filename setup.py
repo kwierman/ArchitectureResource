@@ -11,7 +11,7 @@ install_reqs = reqs = [str(ir.req) for ir in parse_requirements('requirements.tx
 dev_reqs = install_reqs
 
 setup(
-    name='Architecture Resource',
+    name='architectureresource',
     version='0.1.0',
     description="These Violent Delights Have Violent Ends",
     long_description="""
