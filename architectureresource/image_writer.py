@@ -26,8 +26,8 @@ class ImageWriter(object):
   def __init__(self, filename):
     self.filename = filename
     self.roi_tree_name='partroi_tpc_hires_crop_tree'
-    self.roi_br_name=roi_tree_name.replace('tree','branch')
-    self.roi_ch = TChain(roi_tree_name)
+    self.roi_br_name=self.roi_tree_name.replace('tree','branch')
+    self.roi_ch = TChain(self.roi_tree_name)
     self.roi_ch.AddFile(self.filename)    
 
 
