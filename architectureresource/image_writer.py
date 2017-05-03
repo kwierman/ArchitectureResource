@@ -39,7 +39,7 @@ class ImageWriter(object):
     etoi=[]
     for i in range(self.roi_ch.GetEntries()):
       self.roi_ch.GetEntry(i)
-      roi_br=getattr(self.roi_ch, roi_br_name)
+      roi_br=getattr(self.roi_ch, self.roi_br_name)
       bb_array = roi_br.ROIArray()
       bb = bb_array.at(0)
       # filter on particle type
