@@ -1,4 +1,4 @@
-from networks import network_list
+from settings import network_list
 from capture import Capturing, OutputGrabber
 import os, sys
 import time
@@ -9,67 +9,71 @@ import scipy
 from scipy import stats
 from datetime import datetime, timedelta
 import xlsxwriter
-#import caffe
-#caffe.set_device(1)
-#caffe.set_mode_gpu()
+import tempfile
+
 
 def getdatetime(line):
+  """
+    Convenience func for getting datetime from 
+    log file lines
+  """
   token = line.split()[1]
   return datetime.strptime(token, '%H:%M:%S.%f')
 
 def getdatetimeforitem(lines, item):
+  """
+    Another convenience func
+  """
   return [getdatetime(line) for line in lines if item in line]
-  
 
-def analyze_batch_size(network, attribs, batch_size):
-  input_network = open(os.path.join(attribs['folder'], attribs['test']), 'r').readlines()
-  output_network = open('tmp.prototxt','w')
 
-  for line in input_network:
-    if "batch_size" in line and not '#' in line:
-      line = "    batch_size: "+str(batch_size)+"\n"
-    if "filler_config:" in line and not '#' in line:
-      line = '    filler_config: "/data/shared/ArchitectureStudyInference/testA.cfg"\n'
-    output_network.write(line)
-  output_network.close()
+class NetworkAnalyzer(object):
+  logger = logging.getLogger('architecture.network')
 
-  try:
-    """
-    My God, this is the DUMBEST THING I HAVE EVER DONE. Seriously
-    """
-    old = time.time()
-    output = subprocess.check_output(['/home/kwierman/proj/src/caffe/build/tools/caffe', 'test', 
-                                    '--weights={}'.format(os.path.join(attribs['folder'], attribs['snapshot'])),
-                                    '--model=tmp.prototxt',
-                                    '--iterations=1',
-                                    #'--gpu=3',
-                                    ],stderr=subprocess.STDOUT)
-    new = time.time()
-    return output, new-old
-  except Exception as e:
-    return "",0
-  return output,0
+  def __init__(self, network, config):
+    self.network = network
+    self.config = config
 
-"""
-  #output = OutputGrabber(threaded=True)
-  #output.start()
-  #err = OutputGrabber(stream=sys.stderr, threaded=True)
-  #err.start()
-  with Capturing() as output:
-    print "Hello World"
-    net = caffe.Net('tmp.prototxt',
-                  os.path.join(attribs['folder'], attribs['snapshot']),
-                  caffe.TEST)
-    #net.forward()
-    time.sleep(1)
-  #output.stop()
-  #err.stop()
-  return output.output+output.err
-  #return output.capturedtext+err.capturedtext
-"""
+  def go(self):
+    with Capturing as output:
+      pass
 
-_table_file = open("data/stage0.csv","w")
-_table_file.write("network,batch_size,memory,exec_time,blob_resize_time,blob_fill_time,load_time,finished_time\n")
+  def analyze_batch_size(self, batch_size):
+    input_network = open(os.path.join(self.config['folder'], 
+                                      self.config['test']), 'r').readlines()
+    with tempfile.NamedTemporaryFile('temp.prototxt') as tmp_network:
+      for line in input_network:
+        if "batch_size" in line and not '#' in line:
+          line = "    batch_size: "+str(batch_size)+"\n"
+        if "filler_config:" in line and not '#' in line:
+          line = '    filler_config: "/data/shared/ArchitectureStudyInference/testA.cfg"\n'
+        tmp_network.write(line)
+      tmp_network.flush()
+      with Capturing() as output:
+        net = caffe.Net('/tmp/temp.prototxt',
+                      os.path.join(self.config['folder'], self.config['snapshot']),
+                      caffe.TEST)
+        net.forward()
+        time.sleep(1)
+        return output.output+output.err
+
+
+class CompositeNetworkAnalyzer(object):
+  logger = logging.getLogger('architecture.network.composite')
+
+  def __init__(self, output_file):
+    self._table_file = open("data/stage0.csv","w")
+    self._table_file.write("network,batch_size,memory,exec_time,blob_resize_time,blob_fill_time,load_time,finished_time\n")
+
+  def go(self):
+    for network in network_list:
+      analyzer = NetworkAnalyzer(network, )
+
+
+
+
+
+
 
 def analyze_network(network, attribs):
   global _table_file
@@ -123,5 +127,5 @@ def analyze_network(network, attribs):
 
 if __name__ == "__main__":
   print "starting"
-  for network in network_list:
+  
     analyze_network(network, network_list[network])
