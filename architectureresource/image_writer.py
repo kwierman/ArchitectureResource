@@ -35,7 +35,7 @@ class ImageWriter(object):
     for particle in self.particles:
       self.get_particle_image(particle)
 
-  def get_particle_image(self, particle)
+  def get_particle_image(self, particle):
     etoi=[]
     for i in range(roi_ch.GetEntries()):
       roi_ch.GetEntry(i)
