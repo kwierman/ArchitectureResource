@@ -128,4 +128,4 @@ def analyze_network(network, attribs):
 if __name__ == "__main__":
   print "starting"
   
-    analyze_network(network, network_list[network])
+  analyze_network(network, network_list[network])
