@@ -43,7 +43,7 @@ class ImageWriter(object):
       bb_array = roi_br.ROIArray()
       bb = bb_array.at(0)
       # filter on particle type
-      if bb.PdgCode()==particles[particle]:
+      if bb.PdgCode()==self.particles[particle]:
         energy = bb.EnergyInit()
         etoi.append([i,energy])
 
